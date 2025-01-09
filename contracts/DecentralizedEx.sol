@@ -24,17 +24,25 @@ contract Exchange {
     mapping(address => mapping(address => uint256)) public orders;
 
     event TokenAdded(address indexed tokenAddress, string name, uint256 initialSupply);
+    event TokenRemoved(address indexed tokenAddress);
     event Deposit(address indexed token, address indexed user, uint256 amount);
     event Withdrawal(address indexed token, address indexed user, uint256 amount);
     event OrderPlaced(address indexed fromToken, address indexed toToken, address indexed user, uint256 amount);
+    event OrderCanceled(address indexed fromToken, address indexed toToken, address indexed user, uint256 amount);
     event OrderFulfilled(address indexed fromToken, address indexed toToken, address indexed user, uint256 amount);
 
-    function addToken(address tokenAddress, string memory name, uint256 initialSupply) public {
+    function addToken(address tokenAddress, string memory name, uint256 initialSupply) public onlyOwner {
         require(tokens[tokenAddress].totalSupply == 0, "Token already exists");
         tokens[tokenAddress].name = name;
         tokens[tokenAddress].totalSupply = initialSupply;
         tokens[tokenAddress].balances[msg.sender] = initialSupply;
         emit TokenAdded(tokenAddress, name, initialSupply);
+    }
+
+    function removeToken(address tokenAddress) public onlyOwner {
+        require(tokens[tokenAddress].totalSupply > 0, "Token does not exist");
+        delete tokens[tokenAddress];
+        emit TokenRemoved(tokenAddress);
     }
 
     function deposit(address token) public payable {
