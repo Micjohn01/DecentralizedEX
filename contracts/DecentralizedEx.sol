@@ -65,6 +65,13 @@ contract Exchange {
         emit OrderPlaced(fromToken, toToken, msg.sender, amount);
     }
 
+    function cancelOrder(address fromToken, address toToken, uint256 amount) public {
+        require(orders[fromToken][toToken] >= amount, "Order amount too low");
+        orders[fromToken][toToken] -= amount;
+        tokens[fromToken].balances[msg.sender] += amount;
+        emit OrderCanceled (fromToken, toToken, msg.sender, amount);
+    }
+
     function fulfillOrder(address fromToken, address toToken, uint256 amount) public {
         require(orders[fromToken][toToken] >= amount, "Insufficient order amount");
         require(tokens[toToken].balances[msg.sender] >= amount, "Insufficient balance to fulfill");
